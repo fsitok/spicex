@@ -1,5 +1,6 @@
 import pya
 from PySpice.Spice.Netlist import Circuit as SpiceCircuit, SubCircuit as SpiceSubCircuit, Netlist as SpiceNetlist
+from PySpice.Unit import *
 from itertools import count
 from typing import Dict, Optional
 
@@ -83,8 +84,8 @@ def netlist_to_spice(netlist: pya.Netlist,
         # TODO: parameters AS, AD
         circuit.M("{}".format(d.id()), ds1, gate, ds2, body,
                   model=model,
-                  width=width,
-                  length=length,
+                  width=width @ u_um,
+                  length=length @ u_um,
                   )
 
     def register_subcircuit_instance(circuit: SpiceCircuit, inst: pya.Circuit):
