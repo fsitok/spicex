@@ -72,6 +72,13 @@ def netlist_to_spice(netlist: pya.Netlist,
 
         # Get net of body if defined. Otherwise create a new floating net.
         body = terminal_map.get('B', temp_net_name())
+        
+        # TODO: remove
+        ch = device_class.name()
+        if ch == 'NMOS':
+          body = 'GND'
+        if ch == 'PMOS':
+          body = 'VDD'
 
         # TODO: parameters AS, AD
         circuit.M("{}".format(d.id()), ds1, gate, ds2, body,
@@ -91,7 +98,7 @@ def netlist_to_spice(netlist: pya.Netlist,
         name = ref.name
         num_pins = ref.pin_count()
         pin_nets = [inst.net_for_pin(i) for i in range(num_pins)]
-        pin_names = [get_net_name(pin_net) for pin_net in pin_nets if pin_net is not None]
+        pin_names = [get_net_name(pin_net) for pin_net in pin_nets]
         circuit.X('{}'.format(inst.id()), name, *pin_names)
 
     def register_subcircuit(circuit: SpiceCircuit, sc: pya.SubCircuit):
@@ -103,7 +110,8 @@ def netlist_to_spice(netlist: pya.Netlist,
         """
         num_pins = sc.pin_count()
         pin_nets = [sc.net_for_pin(i) for i in range(num_pins)]
-        pin_names = list(sorted({get_net_name(pin_net) for pin_net in pin_nets}))
+        pin_names = [get_net_name(pin_net) for pin_net in pin_nets]
+
         subcircuit = SpiceSubCircuit(sc.name, *pin_names)
 
         for d in sc.each_device():
