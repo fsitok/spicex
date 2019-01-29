@@ -28,6 +28,7 @@ netlist.purge_nets()
 
 # Convert KLayout netlist to a PySpice netlist.
 
+# Provide the SPICE model names for the transistor types.
 device_class_name_to_model_mapping = {
     'NMOS': 'NMOS_VTL',
     'PMOS': 'PMOS_VTL'
