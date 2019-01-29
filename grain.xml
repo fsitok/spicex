@@ -10,7 +10,7 @@
 Requires KLayout on DVB branch.
 
 This packages provides functions to convert a KLayout netlist into a SPICE netlist.</doc>
- <doc-url>doc/readme.html</doc-url>
+ <doc-url>https://codeberg.org/tok/spicex</doc-url>
  <url/>
  <license>AGPLv3</license>
  <author>Thomas Kramer</author>
