@@ -2,24 +2,32 @@ import pya
 from PySpice.Spice.Netlist import Circuit as SpiceCircuit, SubCircuit as SpiceSubCircuit, Netlist as SpiceNetlist
 from PySpice.Unit import *
 from itertools import count
-from typing import Dict, Optional
+from typing import Dict, Optional, Union
 
 import logging
+
 logger = logging.getLogger(__name__)
 
+
 def netlist_to_spice(netlist: pya.Netlist,
-                     device_class_name_to_model_mapping: Optional[Dict[str, str]] = None) -> SpiceNetlist:
+                     device_class_name_to_model_mapping: Optional[Dict[str, str]] = None,
+                     default_bulk_net: Union[str, Dict[str, str]] = 'floating') -> SpiceNetlist:
     """
     Convert a KLayout netlist to a PySpice netlist.
     :param netlist:
     :param device_class_name_to_model_mapping: A dict mapping device class names to model names.
         This is used to have the right transistor model in the spice netlist.
         Default: {'NMOS': 'nmos', 'PMOS': 'pmos'}
+    :param default_bulk_net: 'floating' or {'NMOS': 'SomeNet1', 'PMOS': 'SomeNet2'}
+        Define a default net for bulk contacts if they are not present in the layout.
+        'floating': The bulk contact will not be connected to anything.
+        {'NMOS': 'SomeNet1', 'PMOS': 'SomeNet2'}: Set a fixed net for bulk contacts of NMOS and PMOS tranistors.
+        Default: 'floating'
     :return: PySpice netlist.
     """
-    
+
     if device_class_name_to_model_mapping is None:
-      device_class_name_to_model_mapping = {'NMOS': 'nmos', 'PMOS': 'pmos'}
+        device_class_name_to_model_mapping = {'NMOS': 'nmos', 'PMOS': 'pmos'}
 
     assert netlist.top_circuit_count() == 1, "A well formed netlist should have exactly one top circuit."
 
@@ -34,7 +42,7 @@ def netlist_to_spice(netlist: pya.Netlist,
         :return: New unique net name.
         """
         return "__tmp_net_{}".format(next(_name_counter))
-        
+
     def get_net_name(net: pya.Net) -> str:
         name = net.expanded_name()
         name = name.replace('$', '')
@@ -72,10 +80,16 @@ def netlist_to_spice(netlist: pya.Netlist,
         area_source = d.parameter('AS')
 
         # Get net of body if defined. Otherwise create a new floating net.
-        body = terminal_map.get('B', temp_net_name())
+        bulk = terminal_map.get('B', None)
+
+        if bulk is None:
+            if default_bulk_net == 'floating':
+                bulk = temp_net_name()
+            elif isinstance(default_bulk_net, dict):
+                bulk = default_bulk_net[device_class.name()]
 
         # TODO: parameters AS, AD
-        circuit.M("{}".format(d.id()), ds1, gate, ds2, body,
+        circuit.M("{}".format(d.id()), ds1, gate, ds2, bulk,
                   model=model,
                   width=width @ u_um,
                   length=length @ u_um,
