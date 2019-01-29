@@ -44,6 +44,8 @@ def netlist_to_spice(netlist: pya.Netlist,
         return "__tmp_net_{}".format(next(_name_counter))
 
     def get_net_name(net: pya.Net) -> str:
+        if net is None:
+          return temp_net_name()
         name = net.expanded_name()
         name = name.replace('$', '')
         return name
