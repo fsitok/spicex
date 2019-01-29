@@ -73,13 +73,6 @@ def netlist_to_spice(netlist: pya.Netlist,
 
         # Get net of body if defined. Otherwise create a new floating net.
         body = terminal_map.get('B', temp_net_name())
-        
-        # TODO: remove
-        ch = device_class.name()
-        if ch == 'NMOS':
-          body = 'GND'
-        if ch == 'PMOS':
-          body = 'VDD'
 
         # TODO: parameters AS, AD
         circuit.M("{}".format(d.id()), ds1, gate, ds2, body,
