@@ -14,6 +14,8 @@ import spicex
 Netlist extraction is skipped here.
 See KLayout documentation on how to extract a netlist.
 
+https://github.com/KLayout/klayout/wiki/2019-01-07
+
 """
 
 # Perform netlist extraction
